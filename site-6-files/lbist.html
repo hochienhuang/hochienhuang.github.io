@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STUMPS-based LBIST — Ho-Chien Huang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gelasio:wght@400;700&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Ho-Chien Huang — personal site. Edit the tokens below to restyle. */
+
+:root{
+  --bg:#0B0D11; --surface:#12151B; --surface-2:#171B22;
+  --line:#232935; --line-2:#39424F;
+  --fg:#DCE1E9; --fg-2:#96A0AE; --fg-3:#626B79;
+  --accent:#8A93FF; --accent-bg:rgba(138,147,255,.10);
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --serif:Georgia,"Gelasio","Times New Roman",serif;
+  --maxw:1040px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--serif);
+     font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+.topbar{border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:20}
+.topbar .wrap{display:flex;align-items:center;height:56px}
+.brand{font-family:var(--mono);font-size:13px;letter-spacing:.06em;color:var(--fg-2)}
+.brand a{color:var(--fg-2)}
+.brand a:hover{color:var(--fg);text-decoration:none}
+
+.hero{padding:72px 0 56px;border-bottom:1px solid var(--line)}
+.hero h1{font-family:var(--serif);font-weight:700;font-size:clamp(2rem,5vw,2.9rem);
+         line-height:1.1;letter-spacing:-.02em;margin:0 0 28px}
+
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;padding:0;list-style:none}
+.tags button{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;background:transparent;
+  border:1px solid var(--line-2);color:var(--fg-2);padding:6px 11px;cursor:pointer;
+  transition:border-color .15s,color .15s,background .15s}
+.tags button:hover{border-color:var(--fg-3);color:var(--fg)}
+.tags button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.taghint{font-family:var(--mono);font-size:11px;color:var(--fg-3);margin:0 0 26px}
+
+.lede{font-size:17px;color:var(--fg-2);margin:0 0 32px}
+.spec{border-top:1px solid var(--line);margin:0 0 30px}
+.spec dl{display:grid;grid-template-columns:minmax(110px,auto) 1fr;margin:0}
+.spec dt,.spec dd{font-family:var(--mono);font-size:12px;padding:9px 0;border-bottom:1px solid var(--line);margin:0}
+.spec dt{color:var(--fg-3);letter-spacing:.1em}
+.spec dd{color:var(--fg);padding-left:16px}
+
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font-family:var(--mono);font-size:12px;letter-spacing:.06em;border:1px solid var(--line-2);
+     color:var(--fg);padding:9px 16px;display:inline-block}
+.btn:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
+
+section{padding:56px 0}
+.eyebrow{font-family:var(--serif);font-size:clamp(1.55rem,3vw,1.9rem);font-weight:700;
+  letter-spacing:.03em;color:var(--fg);display:flex;justify-content:space-between;align-items:baseline;
+  border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:32px}
+.clearbtn{font-family:var(--mono);font-size:11px;letter-spacing:.1em;background:transparent;
+  border:1px solid var(--accent);color:var(--accent);padding:4px 10px;cursor:pointer}
+.clearbtn[hidden]{display:none}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);
+      padding:22px 22px 18px;color:inherit;
+      transition:border-color .2s,background .2s,opacity .2s,box-shadow .2s}
+.card:hover{border-color:var(--line-2);background:var(--surface-2);text-decoration:none}
+.card.hit{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 0 34px -8px rgba(138,147,255,.5)}
+.card.miss{opacity:.3}
+.card.miss:hover{opacity:.55}
+.card .domain{font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.16em;color:var(--accent);margin-bottom:14px}
+.card h3{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.32;letter-spacing:-.01em;margin:0 0 10px;color:var(--fg)}
+.card p{font-size:15px;color:var(--fg-2);line-height:1.65;margin:0 0 20px}
+
+.metric{border-top:1px solid var(--line);padding-top:14px;margin-bottom:18px}
+.metric .val{font-family:var(--mono);font-size:clamp(2rem,4.6vw,2.6rem);font-weight:500;letter-spacing:-.01em;line-height:1}
+.metric .val span{font-size:.55em;color:var(--fg-2);margin-left:4px}
+.metric .cond{font-family:var(--mono);font-size:11px;color:var(--fg-3);margin-top:8px;line-height:1.6}
+.stack{font-family:var(--mono);font-size:11px;color:var(--fg-3);margin:0 0 16px}
+.more{font-family:var(--mono);font-size:12px;color:var(--accent);margin-top:auto}
+
+.detail-head{padding:60px 0 40px;border-bottom:1px solid var(--line)}
+.detail-head .domain{font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:.18em;color:var(--accent);margin-bottom:16px}
+.detail-head h1{font-family:var(--serif);font-size:clamp(1.9rem,4.2vw,2.65rem);font-weight:700;line-height:1.2;letter-spacing:-.015em;margin:0 0 24px}
+.metarow{display:grid;grid-template-columns:minmax(120px,auto) 1fr;border-top:1px solid var(--line)}
+.metarow dt,.metarow dd{font-family:var(--mono);font-size:12px;padding:9px 0;border-bottom:1px solid var(--line);margin:0}
+.metarow dt{color:var(--fg-3);letter-spacing:.08em}
+.metarow dd{color:var(--fg);padding-left:16px}
+
+.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.results div{background:var(--surface);padding:20px}
+.results .val{font-family:var(--mono);font-size:2.1rem;font-weight:500;line-height:1}
+.results .val span{font-size:.5em;color:var(--fg-2);margin-left:3px}
+.results .cond{font-family:var(--mono);font-size:11px;color:var(--fg-3);margin-top:10px;line-height:1.6}
+
+.bullets{list-style:none;padding:0;margin:0}
+.bullets li{font-size:16px;border-bottom:1px solid var(--line);padding:16px 0 16px 26px;position:relative;color:var(--fg-2)}
+.bullets li::before{content:"—";position:absolute;left:0;color:var(--fg-3);font-family:var(--mono)}
+.bullets li:first-child{border-top:1px solid var(--line)}
+.backlink{font-family:var(--mono);font-size:12px}
+
+.job h3{font-family:var(--serif);font-size:21px;font-weight:700;line-height:1.35;margin:0 0 8px;color:var(--fg)}
+.jobmeta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 20px;
+  font-family:var(--mono);font-size:12.5px;color:var(--fg-3);margin:0 0 22px}
+.jobmeta .where{color:var(--fg-2)}
+
+.photos{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px;margin-top:4px}
+.photos figure{margin:0}
+.photos img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;border:1px solid var(--line);
+  filter:saturate(.5) brightness(.92);transition:filter .25s}
+.photos img:hover{filter:none}
+.photos h3{font-family:var(--serif);font-size:21px;font-weight:700;margin:16px 0 8px;color:var(--fg)}
+.photos p{font-size:15.5px;color:var(--fg-2);margin:0;line-height:1.7}
+
+footer{border-top:1px solid var(--line);padding:36px 0 60px}
+.contact{display:flex;flex-wrap:wrap;gap:20px;font-family:var(--mono);font-size:12.5px}
+.contact a{color:var(--fg-2)}
+.contact a:hover{color:var(--accent)}
+.colophon{font-family:var(--mono);font-size:11px;color:var(--fg-3);margin-top:22px}
+
+@media (prefers-reduced-motion:reduce){.card,.photos img{transition:none}}
+
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap"><div class="brand"><a href="index.html">← HO-CHIEN HUANG</a></div></div></div>
+
+<header class="detail-head">
+  <div class="wrap">
+    <div class="domain">DIGITAL / TEST</div>
+    <h1>STUMPS-based LBIST for an 8-bit configurable FSM sequence detector</h1>
+    <dl class="metarow">
+      <dt>WHERE</dt><dd>University of Cincinnati — MEng capstone</dd>
+      <dt>PERIOD</dt><dd>Oct 2025 – Apr 2026</dd>
+      <dt>ADVISOR</dt><dd>Prof. Wen-Ben Jone — VLSI testing and BIST</dd>
+      <dt>PROCESS</dt><dd>32 nm</dd>
+      <dt>TOOLS</dt><dd>Synopsys Design Compiler · IC Compiler II · TetraMAX · TCL</dd>
+    </dl>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span>THE NUMBERS</span></div>
+    <div class="results">
+      <div>
+        <div class="val">99.78<span>%</span></div>
+        <div class="cond">transition fault coverage from TetraMAX ATPG</div>
+      </div>
+      <div>
+        <div class="val">4,627</div>
+        <div class="cond">flip-flops, all running at 100 MHz</div>
+      </div>
+      <div>
+        <div class="val">79.59<span>%</span></div>
+        <div class="cond">core area used, inside a 310 × 310 µm budget</div>
+      </div>
+      <div>
+        <div class="val">10</div>
+        <div class="cond">scan chains running in parallel</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="eyebrow"><span>WHAT I DID</span></div>
+    <ul class="bullets">
+      <li>The design is an 8-bit configurable FSM built on a LUT architecture. It had to fit inside 310 × 310 µm, which worked out to 4,627 flip-flops at 100 MHz and 79.59% core area utilization.</li>
+      <li>I inserted 10 parallel scan chains and ran ATPG in TetraMAX. Transition fault coverage came out at 99.78%.</li>
+      <li>On top of that I built a STUMPS-based LBIST controller — PRPG, MISR, BIST FSM — and checked the golden MISR signature against 100 pseudo-random test patterns.</li>
+      <li>After CTS optimization and RC extraction I confirmed timing closure in post-layout simulation, then cleared DRC and LVS. One glitch on the output turned out to need an extra flip-flop to filter it out.</li>
+      <li>The whole RTL-to-GDSII flow runs from custom TCL scripts across Design Compiler, IC Compiler II and TetraMAX. Before that, every tool boundary was a manual handoff, which is where most of my mistakes were coming from.</li>
+      <li>I had already prototyped the same design on the Cadence side (Genus, Innovus, Xcelium) in an earlier Intro to VLSI course project.</li>
+    </ul>
+    <p style="margin-top:32px"><a class="backlink" href="index.html">← Back to all projects</a></p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="contact">
+      <a href="mailto:hochienhuang1@gmail.com">hochienhuang1@gmail.com</a>
+      <a href="https://linkedin.com/in/erichuang-tw">linkedin.com/in/erichuang-tw</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Clicking a skill tag highlights the projects that use it. */
+
+(function () {
+  var bar = document.querySelector('.tags');
+  if (!bar) return;
+
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card[data-id]'));
+  var clearBtn = document.getElementById('clearfilter');
+  var section = document.getElementById('projects');
+  var active = null;
+  var reduced = window.matchMedia &&
+                window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function reset() {
+    active = null;
+    bar.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+    cards.forEach(function (c) { c.classList.remove('hit', 'miss'); });
+    if (clearBtn) clearBtn.hidden = true;
+  }
+
+  function select(btn) {
+    active = btn;
+    var wanted = btn.dataset.projects.split(' ');
+    bar.querySelectorAll('button').forEach(function (b) {
+      b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+    });
+    cards.forEach(function (c) {
+      var hit = wanted.indexOf(c.dataset.id) !== -1;
+      c.classList.toggle('hit', hit);
+      c.classList.toggle('miss', !hit);
+    });
+    if (clearBtn) clearBtn.hidden = false;
+    if (section) section.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  bar.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-projects]');
+    if (!btn) return;
+    if (btn === active) { reset(); } else { select(btn); }
+  });
+
+  if (clearBtn) clearBtn.addEventListener('click', reset);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && active) reset();
+  });
+})();
+
+</script>
+</body>
+</html>
